@@ -327,8 +327,7 @@ typedef struct VideoState {
 static AVFrame *frameRGB = NULL;
 static int numBytes = 0;
 static uint8_t *buffer = NULL;
-// static torch::jit::script::Module net;
-static PoolNet net;
+static PoolNet net0, net1, net2;
 static int input_image_size = 0;
 static int cnt = 0;
 
@@ -945,7 +944,7 @@ static int my_upload_texture(SDL_Texture **tex, AVFrame *frame, struct SwsContex
     if (frameRGB == NULL) {
         frameRGB = av_frame_alloc();
         frameRGB->width = 300;
-        frameRGB->height = 400;
+        frameRGB->height = 600;
         frameRGB->format = AV_PIX_FMT_RGB24;
         numBytes = avpicture_get_size(frameRGB->format, frameRGB->width, frameRGB->height);
         buffer = (uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
@@ -974,15 +973,29 @@ static int my_upload_texture(SDL_Texture **tex, AVFrame *frame, struct SwsContex
     auto img_tensor = torch::from_blob(frameRGB->data[0], {1, frameRGB->height, frameRGB->width, 3}, torch::kByte).to(torch::kCUDA);
     img_tensor = img_tensor.permute({0,3,1,2});
     img_tensor = img_tensor.toType(torch::kFloat);
+    int size0 = frameRGB->height / 3;
+    int size1 = size0;
+    int size2 = frameRGB->height - size0 - size1;
+    auto split_list = img_tensor.split_with_sizes(/*size=*/{size0, size1, size2}, /*dim=*/2);
+    auto img_tensor0 = split_list[0];
+    auto img_tensor1 = split_list[1].to(torch::Device(torch::kCUDA, 1));
+    auto img_tensor2 = split_list[2].to(torch::Device(torch::kCUDA, 2));
 
     /* torch::Tensor -> frameGRAY */
     auto start = std::chrono::high_resolution_clock::now();
-    auto out = net->forward(img_tensor);
+    auto out0 = net0->forward(img_tensor0);
+    auto out1 = net1->forward(img_tensor1);
+    auto out2 = net2->forward(img_tensor2);
+    out0 = out0.to(torch::kCPU);
+    out1 = out1.to(torch::kCPU);
+    out2 = out2.to(torch::kCPU);
+    auto out = torch::cat({out0, out1, out2}, 2);
+
     out.squeeze_();
     out.sigmoid_();
     out.mul_(255.0);
     out = out.toType(torch::kByte);
-    out = out.to(torch::kCPU);
+    // out = out.to(torch::kCPU);
     out = out.contiguous();
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -3932,16 +3945,29 @@ int main(int argc, char **argv)
     torch::Device device(device_type);
     input_image_size = 256;
 
-    net = PoolNet();
-    std::cout << "loading weight ..." << std::endl;
-    // net = torch::jit::load("../models/poolnet.pt");
-    torch::load(net, "../models/poolnet.pt");
-    std::cout << "weight loaded ..." << std::endl;
-    // net.to(torch::kCUDA);
-    net->to(torch::kCUDA);
+    net0 = PoolNet();
+    std::cout << "loading weight 0..." << std::endl;
+    torch::load(net0, "../models/poolnet.pt");
+    std::cout << "weight loaded 0..." << std::endl;
+    net0->to(torch::Device(torch::kCUDA, 0));
     torch::NoGradGuard no_grad;
-    // net.eval();
-    net->eval();
+    net0->eval();
+
+    net1 = PoolNet();
+    std::cout << "loading weight 1..." << std::endl;
+    torch::load(net1, "../models/poolnet.pt");
+    std::cout << "weight loaded 1..." << std::endl;
+    net1->to(torch::Device(torch::kCUDA, 1));
+    // torch::NoGradGuard no_grad;
+    net1->eval();
+
+    net2 = PoolNet();
+    std::cout << "loading weight 2..." << std::endl;
+    torch::load(net2, "../models/poolnet.pt");
+    std::cout << "weight loaded 2..." << std::endl;
+    net2->to(torch::Device(torch::kCUDA, 2));
+    // torch::NoGradGuard no_grad;
+    net2->eval();
 
     is = stream_open(input_filename, file_iformat);
     if (!is) {
