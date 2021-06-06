@@ -327,7 +327,6 @@ typedef struct VideoState {
 static AVFrame *frameRGB = NULL;
 static int numBytes = 0;
 static uint8_t *buffer = NULL;
-// static torch::jit::script::Module net;
 static PoolNet net;
 static int input_image_size = 0;
 static int cnt = 0;
@@ -3934,13 +3933,10 @@ int main(int argc, char **argv)
 
     net = PoolNet();
     std::cout << "loading weight ..." << std::endl;
-    // net = torch::jit::load("../models/poolnet.pt");
     torch::load(net, "../models/poolnet.pt");
     std::cout << "weight loaded ..." << std::endl;
-    // net.to(torch::kCUDA);
     net->to(torch::kCUDA);
     torch::NoGradGuard no_grad;
-    // net.eval();
     net->eval();
 
     is = stream_open(input_filename, file_iformat);
