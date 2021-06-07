@@ -78,7 +78,7 @@ source ~/.bashrc
 
 ### nvidia-460 + cuda-11.2
 
-If you have a GPU, follow this [tutorial](https://blog.csdn.net/weixin_43742643/article/details/115355545).   
+If you have a GPU, follow this [tutorial](https://blog.csdn.net/weixin_43742643/article/details/115355545).
 If not, skip this step.
 
 ### LibToch
@@ -107,7 +107,7 @@ git clone git@github.com:hanjialeOK/PoolNet-in-FFmpeg.git
 
 ### Download model
 
-You can download `poolnet.pt` from [BaiDuYun]() and put it into PoolNet-in-FFmpeg/models.
+You can download `poolnet.pt` from [BaiDuYun](https://pan.baidu.com/s/1_s-IhXHT_oytnxsIueqSTA)(a7a4) and put it into PoolNet-in-FFmpeg/models.
 In addition, you can export the model by yourself following the steps below.
 
 Firstly, git clone [PoolNet](https://github.com/backseason/PoolNet).
