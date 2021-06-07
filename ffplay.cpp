@@ -65,7 +65,6 @@ extern "C"
 #include <torch/script.h>
 #include <chrono>
 #include <time.h>
-#include "networks/poolnet.h"
 
 #include <assert.h>
 
