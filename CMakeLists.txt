@@ -12,7 +12,6 @@ set(FFMPEG_SOURCE ~/ffmpeg-4.3.1)
 set(FFMPEG_BUILD ~/ffmpeg-4.3.1/build)
 
 set(CMAKE_CXX_FLAGS   "-fpermissive -w -g")
-set(CMAKE_INSTALL_PREFIX /usr/local)
 
 aux_source_directory(. DIR_SRCS)
 aux_source_directory(networks/ DIR_SRCS)
