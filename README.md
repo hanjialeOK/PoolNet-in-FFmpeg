@@ -2,12 +2,8 @@
 
 ## Introduction
 
-I put [PoolNet](https://github.com/backseason/PoolNet) in ffplay, a simple player of FFmpeg, and compile them to myplay. So that it could dectect salient objects in videos.  
-I rewrite [PoolNet](https://github.com/backseason/PoolNet)(resnet50, without edge) using pytorch C++ fronted, `deeplab_resnet.cpp` and `poolnet.cpp` are in networks/. Another three source files come from FFmpeg-4.3.1/fftools and I change `ffplay.c` to `ffplay.cpp`.  
-
-## What I am doing
-
-This project has been done.
+I integrate [PoolNet](https://github.com/backseason/PoolNet) into ffplay, so that it could dectect salient objects in videos.  
+I rewrite [PoolNet](https://github.com/backseason/PoolNet)(resnet50, without edge) using pytorch C++ fronted, `deeplab_resnet.cpp` and `poolnet.cpp` are in networks/. `cmdutils.c`, `cmdutils.h` and `ffplay.c` come from FFmpeg-4.3.1/fftools and I change `ffplay.c` to `ffplay.cpp`. This project is based on [myplay](https://github.com/hanjialeOK/myplay).
 
 ## Branches
 
@@ -18,35 +14,43 @@ This project has been done.
 
 ## Figure Illustration
 
-This figure shows how ffplay works. I put PoolNet into upload_texture()(red circle and red arrows).
+This figure shows how ffplay works. I put PoolNet into upload_texture().
 
 ![ffplay](./figures/ffplay.svg)
 
+This figure shows the difference between **master** and **jit**.
+
+![master and jit](./figures/twoways.svg)
+
 This figure shows the conversion process in upload_texture().
 
-![master](./figures/flow.svg)
+![conversion](./figures/flow.svg)
 
-This figure shows how to use multi GPUs to accelerate.
+This figure shows how to use multi GPUs to accelerate. faster but worse results.
 
 ![multigpu](./figures/multigpu.svg)
 
-## Warning & Advice
+This figure shows the result of **master**. Original size is 1078x1642, I scale it to 256x256 as input.
+
+![result of master](./figures/record.gif)
+
+## Conclusion & Prospect
 
 - In C++, **network depth** and **input/output size** will affect the running time of the network. For this project, [PoolNet](https://github.com/backseason/PoolNet) has 236 layers totally and 92 convolution layers. input/output size is 256x256. I get 86ms(10~12fps) on a single GTX 1080 Ti.
+- It's wired that tha same model in different environments have different results. In pytorch, for 300x400 input, it gets 30 fps,
+However, in C++, for 256x256 input, it gets 12 fps. The reason deserve exploring.
 
 ## Requirements
 
 - CMake >= 3.0
 - GNU >= 5.4.0
-- LibTorch >= 1.5.0
 - SDL2 >= 2.0
 - FFmpeg == 4.3.1 or 4.3.2
+- LibTorch >= 1.5.0
 
 ## Installation
 
-### FFmpeg-4.3.1
-
-#### SDL2 & yasm
+### SDL2 & yasm
 
 ffplay needs SDL2. yasm is needed when compiling FFmpeg source code.
 
@@ -55,7 +59,7 @@ sudo apt install libsdl2-dev
 sudo apt install yasm
 ```
 
-#### FFmpeg
+### FFmpeg
 
 ```c
 wget http://ffmpeg.org/releases/ffmpeg-4.3.1.tar.gz
@@ -99,7 +103,7 @@ source ~/.bashrc
 
 if you want to download previous versions, visit [here](https://blog.csdn.net/weixin_43742643/article/details/114156298).
 
-### Clone our codes
+### Clone this repo
 
 ```c
 git clone git@github.com:hanjialeOK/PoolNet-in-FFmpeg.git
@@ -107,7 +111,7 @@ git clone git@github.com:hanjialeOK/PoolNet-in-FFmpeg.git
 
 ### Download model
 
-You can download `poolnet.pt` from [BaiDuYun](https://pan.baidu.com/s/1_s-IhXHT_oytnxsIueqSTA)(a7a4) and put it into PoolNet-in-FFmpeg/models.
+You can download `poolnet.pt` from [BaiDuYun](https://pan.baidu.com/s/1_s-IhXHT_oytnxsIueqSTA)(a7a4) and put it into PoolNet-in-FFmpeg/models.  
 In addition, you can export the model by yourself following the steps below.
 
 Firstly, git clone [PoolNet](https://github.com/backseason/PoolNet).
@@ -177,4 +181,5 @@ cd PoolNet-in-FFmpeg
 mkdir build && cd build
 cmake ..
 make
+./myplay test.mp4
 ```
