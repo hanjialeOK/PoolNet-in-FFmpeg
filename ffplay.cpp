@@ -59,8 +59,8 @@ extern "C"
 #include "cmdutils.h"
 }
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_thread.h>
+#include <SDL.h>
+#include <SDL_thread.h>
 #include <torch/torch.h>
 #include <torch/script.h>
 #include <chrono>
