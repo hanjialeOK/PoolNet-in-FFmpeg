@@ -16,23 +16,23 @@ I rewrite [PoolNet](https://github.com/backseason/PoolNet)(resnet50, without edg
 
 This figure shows how ffplay works. I put PoolNet into upload_texture().
 
-![ffplay](./figures/ffplay.svg)
+<div align=center><img src=./figures/ffplay.svg></div>
 
 This figure shows the difference between **master** and **jit**.
 
-![master and jit](./figures/twoways.svg)
+<div align=center><img src=./figures/twoways.svg></div>
 
 This figure shows the conversion process in upload_texture().
 
-![conversion](./figures/flow.svg)
+<div align=center><img src=./figures/flow.svg></div>
 
 This figure shows how to use multi GPUs to accelerate. faster but worse results.
 
-![multigpu](./figures/multigpu.svg)
+<div align=center><img src=./figures/multigpu.svg></div>
 
 This figure shows the result of **master**. Original size is 1078x1642, I scale it to 256x256 as input.
 
-![result of master](./figures/record.gif)
+<div align=center><img src=./figures/record.gif></div>
 
 ## Conclusion & Prospect
 
